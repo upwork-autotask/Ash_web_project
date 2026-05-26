@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Boomerang Commission Tracker — UW007</title>
+  <meta name="theme-color" content="#111827" />
+  <link rel="stylesheet" href="styles.css?v=20260516-2210" />
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <div class="nav-backdrop" id="navBackdrop"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <span class="logo">BC</span>
+      <div><b>Boomerang Commission Tracker</b><small>UW007 · Post-enrolment demo</small></div>
+      <button type="button" class="nav-close" id="navCloseBtn" aria-label="Close menu">×</button>
+    </div>
+    <nav>
+      <a class="active" href="#dashboard" data-view="dashboard"><span>⌘</span>Dashboard</a>
+      <a href="#enrolments" data-view="enrolments"><span>🎓</span>Enrolments</a>
+      <a href="#schedule" data-view="schedule"><span>📅</span>Schedule</a>
+      <a href="#reminders" data-view="reminders"><span>📣</span>Reminders</a>
+      <a href="#reports" data-view="reports"><span>📊</span>Reports</a>
+      <a href="#settings" data-view="settings"><span>⚙</span>Upgrade</a>
+    </nav>
+    <div class="side-note">
+      <b>Upstream</b>
+      <span>Leeds CRM owns confirmed enrolments. This tracker takes it from there: instalments, college follow-ups, and a running expected vs received view.</span>
+    </div>
+  </aside>
+
+  <main>
+    <header class="topbar">
+      <button class="mobile-menu" id="mobileMenuBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
+      <div>
+        <p class="eyebrow">Post-enrolment commission tracking</p>
+        <h1 id="pageTitle">Dashboard</h1>
+      </div>
+      <div class="actions">
+        <button class="btn secondary" id="exportCsvBtn"><span>⬇</span> CSV</button>
+        <button class="btn secondary" id="exportJsonBtn"><span>☁</span> Backup</button>
+        <button class="btn primary" id="newStudentBtn"><span>＋</span> New enrolment</button>
+      </div>
+    </header>
+
+    <section class="view active" id="dashboardView">
+      <div class="sales-hero">
+        <div class="hero-copy">
+          <span class="badge">Built for Boomerang International</span>
+          <h2>Track every commission instalment from confirmed enrolment to final payment.</h2>
+          <p>Leeds CRM confirms the enrolment. This tracker handles the part that comes after: known first instalments, the long-tail ones that depend on the college reporting back, and the reminders you need to send to chase them.</p>
+          <div class="hero-actions">
+            <button class="btn primary" id="heroNewStudentBtn"><span>＋</span> Add enrolment</button>
+            <button class="btn ghost" data-jump="schedule"><span>📅</span> View schedule</button>
+          </div>
+          <div class="trust-row">
+            <span>✓ Multi-year instalments</span>
+            <span>✓ Reminder workflow</span>
+            <span>✓ Expected vs received</span>
+            <span>✓ Per-college rollup</span>
+          </div>
+        </div>
+        <div class="hero-preview">
+          <div class="preview-window">
+            <div class="window-dots"><i></i><i></i><i></i></div>
+            <div class="mini-card top"><b>Maya Chen · #2</b><span>Monash Malaysia · $1,850 overdue</span></div>
+            <div class="mini-card mid"><b>Reminder due</b><span>3 colleges, 4 instalments this week</span></div>
+            <div class="mini-chart"><span style="height:34%"></span><span style="height:62%"></span><span style="height:88%"></span><span style="height:48%"></span></div>
+          </div>
+        </div>
+      </div>
+
+      <section class="metrics" id="metrics"></section>
+
+      <section class="grid two">
+        <article class="card spotlight-card">
+          <div class="card-head"><h2>Instalments to chase</h2><span class="pill red" id="dueCount">0 to chase</span></div>
+          <div id="dueList" class="list"></div>
+        </article>
+        <article class="card">
+          <div class="card-head"><h2>Recent activity</h2><span class="pill blue">live demo</span></div>
+          <div id="activityList" class="timeline"></div>
+        </article>
+      </section>
+    </section>
+
+    <section class="view" id="enrolmentsView">
+      <article class="card table-card">
+        <div class="section-title">
+          <div><h2>Confirmed enrolments</h2><p>Each enrolment carries its own instalment schedule. Fed from Leeds CRM in production, seeded for the demo.</p></div>
+          <span class="pill green">post-enrolment</span>
+        </div>
+        <div class="toolbar">
+          <input id="searchInput" placeholder="Search student, course, college..." />
+          <select id="ownerFilter"><option value="">All owners</option></select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Student</th><th>Course / college</th><th>Total commission</th><th>Received / expected</th><th>Next instalment</th><th>Owner</th><th></th></tr></thead>
+            <tbody id="studentRows"></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <section class="view" id="scheduleView">
+      <article class="card">
+        <div class="section-title">
+          <div><h2>Instalment schedule</h2><p>Every instalment across every enrolment, sorted by what needs attention first.</p></div>
+          <span class="pill amber">board view</span>
+        </div>
+        <div class="kanban" id="kanban"></div>
+      </article>
+    </section>
+
+    <section class="view" id="remindersView">
+      <article class="card">
+        <div class="section-title">
+          <div><h2>Colleges to follow up</h2><p>Overdue and due-soon instalments grouped by college. Log a reminder or mark received when the college pays.</p></div>
+          <span class="pill red">action queue</span>
+        </div>
+        <div class="toolbar">
+          <select id="statusFilter"><option value="">All instalment states</option></select>
+        </div>
+      </article>
+      <div id="remindersList"></div>
+    </section>
+
+    <section class="view" id="reportsView">
+      <section class="grid two">
+        <article class="card table-card">
+          <div class="card-head"><h2>By college</h2><span class="pill blue">rollup</span></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>College / university</th><th>Instalments</th><th>Expected</th><th>Received</th><th>Total</th></tr></thead>
+              <tbody id="collegeRows"></tbody>
+            </table>
+          </div>
+        </article>
+        <article class="card">
+          <div class="card-head"><h2>By due month</h2><span class="pill green">forecast</span></div>
+          <div id="monthBars" class="bars"></div>
+          <p><small>Blue = expected, green = already received. Bars scaled to the busiest month.</small></p>
+        </article>
+      </section>
+      <article class="card agenda-card">
+        <div class="card-head"><h2>To confirm on the call</h2><span class="pill red">scope check</span></div>
+        <ul class="checks">
+          <li><b>Instalment cadence:</b> confirm typical schedule per college (annual, semester, etc.) and how many years.</li>
+          <li><b>First instalment trigger:</b> when is the first commission known — at enrolment, at start of term, on first tuition receipt?</li>
+          <li><b>College reporting:</b> which colleges report instalments proactively vs need chasing.</li>
+          <li><b>Reminder cadence:</b> how often to nudge a college after a missed instalment, and through what channel.</li>
+          <li><b>Leeds CRM sync:</b> CSV export, direct API, or a webhook on confirmation.</li>
+          <li><b>Production scope:</b> shared accounts, audit trail, scheduled reminder emails, payment receipts upload.</li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="view" id="settingsView">
+      <article class="card upgrade premium-upgrade">
+        <div>
+          <p class="eyebrow">Recommended next phase</p>
+          <h2>Production Commission Tracker</h2>
+          <p>This demo runs in the browser. The paid production version adds a real database, multi-user access, Leeds CRM sync, scheduled reminder emails to colleges, and audit logs of every payment receipt.</p>
+        </div>
+        <div class="upgrade-grid">
+          <span>🔐 Login &amp; roles</span><span>🔁 Leeds CRM sync</span><span>📧 Scheduled college reminders</span><span>🧾 Receipts log + uploads</span><span>📊 Forecast dashboard</span><span>📤 Excel / PDF export</span><span>🛡 Audit trail</span>
+        </div>
+      </article>
+      <article class="card danger-zone">
+        <h2>Demo controls</h2>
+        <p>Reset browser demo data before presenting if needed.</p>
+        <button class="btn secondary" id="resetBtn">Reset demo data</button>
+      </article>
+    </section>
+  </main>
+
+  <dialog id="studentDialog">
+    <form method="dialog" id="studentForm">
+      <div class="modal-head"><h2 id="modalTitle">New enrolment</h2><button type="button" class="icon" id="modalCloseBtn" aria-label="Close dialog" onclick="event.preventDefault(); document.getElementById('studentDialog').close();">×</button></div>
+      <input type="hidden" id="studentId" />
+      <label>Student name<input id="name" required /></label>
+      <label>Course<input id="course" required /></label>
+      <label>College / university<input id="college" /></label>
+      <div class="form-grid">
+        <label>Owner<input id="owner" /></label>
+        <label>Start term<input id="startTerm" placeholder="e.g. Sep 2026" /></label>
+      </div>
+      <label>Enrolled date<input id="enrolledDate" type="date" /></label>
+      <label>Notes<textarea id="notes" rows="3"></textarea></label>
+      <div class="instalment-block">
+        <h3>Instalment schedule</h3>
+        <div id="instalmentList"></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn secondary danger" id="deleteBtn">Delete</button>
+        <span></span>
+        <button type="button" class="btn secondary" id="cancelBtn" onclick="event.preventDefault(); document.getElementById('studentDialog').close();">Cancel</button>
+        <button class="btn primary" id="saveBtn" value="default">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="app.js?v=20260516-2210"></script>
+</body>
+</html>
