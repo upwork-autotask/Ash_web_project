@@ -46,8 +46,12 @@ const seedStudents = [
 ];
 let state = loadState();
 let currentView = 'dashboard';
-function loadState(){try{const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)); if(saved?.students){recomputeStatuses(saved.students); return {...saved, activity:saved.activity||[]};} const fresh={students:seedStudents, activity:[]}; recomputeStatuses(fresh.students); return fresh;}catch{const fresh={students:seedStudents, activity:[]}; recomputeStatuses(fresh.students); return fresh;}}
-function saveState(){localStorage.setItem(STORAGE_KEY, JSON.stringify(state));}
+let cloudReady = false;
+function freshState(){const fresh={students:JSON.parse(JSON.stringify(seedStudents)), activity:[]}; recomputeStatuses(fresh.students); return fresh;}
+function loadState(){try{const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)); if(saved?.students){recomputeStatuses(saved.students); return {...saved, activity:saved.activity||[]};} return freshState();}catch{return freshState();}}
+function saveState(){localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); if(cloudReady) syncStateToCloud();}
+async function loadCloudState(){try{const res=await fetch('/api/state',{cache:'no-store'}); if(!res.ok) throw new Error('Cloud sync unavailable'); const data=await res.json(); if(data.state?.students){state={...data.state, activity:data.state.activity||[]}; recomputeStatuses(state.students); localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); renderOwnerFilter(); render();} else {await syncStateToCloud();} cloudReady=true;}catch(error){console.warn(error.message); cloudReady=false;}}
+async function syncStateToCloud(){try{await fetch('/api/state',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify(state)});}catch(error){console.warn('Cloud save failed', error.message);}}
 function today(){return new Date().toISOString().slice(0,10);}
 function daysUntil(date){return Math.ceil((new Date(date+'T00:00:00')-new Date(today()+'T00:00:00'))/86400000);}
 function money(v){return '$'+Math.round(Number(v||0)).toLocaleString();}
@@ -92,7 +96,7 @@ document.getElementById('exportJsonBtn').addEventListener('click',exportJson);
 document.getElementById('resetBtn')?.addEventListener('click',()=>{if(confirm('Reset demo data?')){state={students:JSON.parse(JSON.stringify(seedStudents)),activity:[]}; recomputeStatuses(state.students); saveState(); renderOwnerFilter(); render();}});
 ['searchInput','ownerFilter'].forEach(id=>document.getElementById(id)?.addEventListener('input',renderEnrolments));
 document.getElementById('statusFilter')?.addEventListener('input',renderReminders);
-initOptions(); render();
+initOptions(); render(); loadCloudState();
 
 const sidebar = document.getElementById('sidebar');
 const mobileMenuBtn = document.getElementById('mobileMenuBtn');
